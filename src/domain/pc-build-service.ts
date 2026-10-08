@@ -106,6 +106,9 @@ const CARDS_PER_ROLE = 24;
 export function inStockFrom(availability: string | undefined): boolean | null {
   if (!availability) return null;
   if (/^(InStock|in stock)$/i.test(availability)) return true;
+  // Visible Czech availability line from the product page.
+  if (/^(Není skladem|Na objednávku|Vyprodáno|Dočasně nedostupn|Předobjednávk)/i.test(availability)) return false;
+  if (/^Skladem/i.test(availability)) return true;
   if (/OutOfStock|not purchasable|SoldOut|Discontinued|PreOrder|BackOrder/i.test(availability)) return false;
   return null;
 }

@@ -410,6 +410,9 @@ describe("suggest helpers", () => {
     expect(inStockFrom("in stock")).toBe(true);
     expect(inStockFrom("not purchasable now")).toBe(false);
     expect(inStockFrom("OutOfStock")).toBe(false);
+    expect(inStockFrom("Skladem > 5 ks")).toBe(true);
+    expect(inStockFrom("Na objednávku – termín upřesníme")).toBe(false);
+    expect(inStockFrom("Není skladem")).toBe(false);
     expect(inStockFrom(undefined)).toBeNull();
   });
 });

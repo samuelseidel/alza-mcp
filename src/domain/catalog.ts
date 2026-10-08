@@ -182,6 +182,14 @@ const PRODUCT_PAGE_EXTRACTOR = `(function() {
     h1: (document.querySelector('h1') || {}).textContent || null,
     product: findType('Product'),
     breadcrumb: findType('BreadcrumbList'),
+    // Visible availability line. JSON-LD can say InStock while the page shows
+    // "Na objednávku – termín upřesníme" (live 2026-10-08, YUBIK002a10), so the
+    // rendered text is the source of truth.
+    availabilityText: (function() {
+      var el = document.querySelector('.av-container.availability') || document.querySelector('.av-container');
+      var t = el ? (el.textContent || '').replace(/\\u00a0/g, ' ').trim().replace(/\\s+/g, ' ') : '';
+      return t || null;
+    })(),
     params: Array.from(document.querySelectorAll('.paramTbl tr, table.paramTbl tr, .productSpecBox tr')).slice(0, ${PRODUCT_PARAMS_SCRAPE_CAP}).map(function(tr) {
       var th = tr.querySelector('th'), td = tr.querySelector('td');
       return { name: th ? th.textContent.trim().replace(/\\s+/g,' ') : '', value: td ? td.textContent.trim().replace(/\\s+/g,' ') : '' };
@@ -653,7 +661,7 @@ export class Catalog {
         image: images[0],
         price: offers.price,
         currency: offers.priceCurrency ?? this.browser.locale.currency,
-        availability: offers.availability,
+        availability: data.availabilityText || offers.availability,
         rating: rating.average,
         brand: pickBrand(ld.brand),
         category: breadcrumbs[breadcrumbs.length - 2],
@@ -834,6 +842,7 @@ interface ProductPageData {
   h1: string | null;
   product: Record<string, unknown> | null;
   breadcrumb: Record<string, unknown> | null;
+  availabilityText?: string | null;
   params: Array<{ name: string; value: string }>;
 }
 

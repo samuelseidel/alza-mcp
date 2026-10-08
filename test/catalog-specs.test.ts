@@ -27,6 +27,7 @@ function fakeBrowser(rows: number, emptyFirstReads = 0) {
         h1: "GPU",
         product: { name: "GPU", sku: "GPU1", offers: { price: 100, priceCurrency: "CZK", availability: "https://schema.org/InStock" } },
         breadcrumb: null,
+        availabilityText: "Na objednávku – termín upřesníme",
         params: Array.from({ length: n }, (_, i) => ({ name: `Row ${i + 1}`, value: `${i + 1}` })),
       };
     },
@@ -48,6 +49,12 @@ describe("Catalog.getProduct vs getProductSpecs", () => {
     const pub = await c.getProduct("GPU1");
     expect(pub.params).toHaveLength(30);
     expect(calls.filter((u) => u.includes("gpu-d1"))).toHaveLength(1);
+  });
+
+  it("prefers the visible availability text over JSON-LD InStock", async () => {
+    const { browser } = fakeBrowser(1);
+    const p = await new Catalog(browser).getProduct("GPU1");
+    expect(p.availability).toBe("Na objednávku – termín upřesníme");
   });
 
   it("re-reads the page once when the spec table had not rendered yet", async () => {
